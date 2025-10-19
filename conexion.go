@@ -16,19 +16,19 @@ type Conexion struct {
 	conn     *sql.DB
 }
 
-func NewConexion(server, user, password string, port ...interface{}) *Conexion {
-	p := 1433
+func NewConexion(server, user, password string, optional ...interface{}) *Conexion {
 	db := "master"
+	p := 1433
 
-	if len(port) > 0 {
-		if portVal, ok := port[0].(int); ok {
-			p = portVal
+	if len(optional) > 0 {
+		if dbVal, ok := optional[0].(string); ok && dbVal != "" {
+			db = dbVal
 		}
 	}
 
-	if len(port) > 1 {
-		if dbVal, ok := port[1].(string); ok && dbVal != "" {
-			db = dbVal
+	if len(optional) > 1 {
+		if portVal, ok := optional[1].(int); ok {
+			p = portVal
 		}
 	}
 

@@ -19,14 +19,16 @@ import "github.com/PaoloESAN/mssql-easygo"
 Luego puedes usar la librería:
 
 ```go
-conn := mssql.NewConexion("localhost", "sa", "password", 1433, "midb")
+conn := mssql.NewConexion("localhost", "sa", "password")
+conn := mssql.NewConexion("localhost", "sa", "password", "BaseDeDatos")
+conn := mssql.NewConexion("localhost", "sa", "password", "BaseDeDatos", 1433)
 ```
 
 ---
 
 ## Funciones
 
-### `NewConexion(server, user, password, port(opcional), database(opcional))`
+### `NewConexion(server, user, password, database(opcional), port(opcional))`
 
 Crea una nueva conexión a SQL Server. La conexión se realiza automáticamente.
 
@@ -34,16 +36,16 @@ Crea una nueva conexión a SQL Server. La conexión se realiza automáticamente.
 - `server` (string, requerido): Servidor SQL Server (ej: "localhost")
 - `user` (string, requerido): Usuario (ej: "sa")
 - `password` (string, requerido): Contraseña
-- `port` (int, opcional): Puerto (por defecto 1433)
 - `database` (string, opcional): Nombre de la base de datos (por defecto "master")
+- `port` (int, opcional): Puerto (por defecto 1433)
 
 **Retorna:** `*Conexion`
 
 **Ejemplo:**
 ```go
 c := mssql.NewConexion("localhost", "sa", "password")
-c := mssql.NewConexion("localhost", "sa", "password", 1433)
-c := mssql.NewConexion("localhost", "sa", "password", 1433, "midb")
+c := mssql.NewConexion("localhost", "sa", "password", "midb")
+c := mssql.NewConexion("localhost", "sa", "password", "midb", 1433)
 ```
 
 ---
@@ -169,11 +171,11 @@ package main
 
 import (
 	"fmt"
-	"github.com/PaoloESAN/mssql-easygo"
+	mssql "github.com/PaoloESAN/mssql-easygo"
 )
 
 func main() {
-	c := mssql.NewConexion("localhost", "sa", "password")
+	c := mssql.NewConexion("localhost", "sa", "password", "testdb")
 	defer c.Close()
 
 	// Crear base de datos
