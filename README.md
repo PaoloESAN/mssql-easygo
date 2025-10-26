@@ -149,6 +149,75 @@ if err != nil {
 
 ---
 
+### `SqlSelect(query, args...)`
+
+Ejecuta una consulta SQL personalizada con parámetros. Retorna los resultados como un slice de mapas.
+
+**Parámetros:**
+- `query` (string, requerido): Consulta SQL con placeholders (@p1, @p2, etc.)
+- `args...` (variadic interface{}, opcional): Valores para reemplazar los placeholders
+
+**Retorna:** `[]map[string]interface{}, error`
+
+**Ejemplo:**
+```go
+// SELECT con parámetros
+nombre := "Juan"
+edad := 25
+
+query := "SELECT * FROM usuarios WHERE nombre = @p1 AND edad > @p2"
+results, err := c.SqlSelect(query, nombre, edad)
+if err != nil {
+    fmt.Printf("Error: %v\n", err)
+}
+
+// SELECT con LIKE
+email := "gmail.com"
+query = "SELECT * FROM usuarios WHERE email LIKE @p1"
+results, err = c.SqlSelect(query, "%"+email+"%")
+
+// Sin parámetros
+results, err = c.SqlSelect("SELECT * FROM productos WHERE precio > 100")
+```
+
+---
+
+### `SqlExec(query, args...)`
+
+Ejecuta consultas SQL que no retornan datos (INSERT, UPDATE, DELETE). Retorna el número de filas afectadas.
+
+**Parámetros:**
+- `query` (string, requerido): Consulta SQL con placeholders (@p1, @p2, etc.)
+- `args...` (variadic interface{}, opcional): Valores para reemplazar los placeholders
+
+**Retorna:** `int64, error` (número de filas afectadas)
+
+**Ejemplo:**
+```go
+// INSERT
+rows, err := c.SqlExec("INSERT INTO usuarios (nombre, edad) VALUES (@p1, @p2)", "Maria", 30)
+if err != nil {
+    fmt.Printf("Error: %v\n", err)
+}
+fmt.Printf("Filas insertadas: %d\n", rows)
+
+// UPDATE
+rows, err = c.SqlExec("UPDATE usuarios SET edad = @p1 WHERE nombre = @p2", 26, "Juan")
+
+// DELETE
+rows, err = c.SqlExec("DELETE FROM usuarios WHERE edad < @p1", 18)
+
+// Sin parámetros
+rows, err = c.SqlExec("TRUNCATE TABLE logs")
+```
+
+**Características:**
+- ✅ Protección contra SQL Injection usando parámetros
+- ✅ Soporta cualquier tipo de consulta SQL
+- ✅ Sintaxis flexible con placeholders @p1, @p2, @p3...
+
+---
+
 ### `Close()`
 
 Cierra la conexión con la base de datos.
@@ -205,8 +274,29 @@ func main() {
 		return
 	}
 
-	// Consultar datos
-	results, err := c.Select("usuarios", true)
+	// Consultar con SQL personalizado
+	nombre := "Juan"
+	query := "SELECT * FROM usuarios WHERE nombre = @p1"
+	results, err := c.SqlSelect(query, nombre)
+	if err != nil {
+		fmt.Printf("Error en SQL: %v\n", err)
+		return
+	}
+
+	fmt.Printf("\nUsuarios encontrados: %d\n", len(results))
+	for _, row := range results {
+		fmt.Println(row)
+	}
+
+	// Actualizar con SqlExec
+	rows, err := c.SqlExec("UPDATE usuarios SET email = @p1 WHERE nombre = @p2", "juan_nuevo@email.com", "Juan")
+	if err != nil {
+		fmt.Printf("Error actualizando: %v\n", err)
+		return
+	}
+
+	// Consultar todos los datos
+	results, err = c.Select("usuarios", true)
 	if err != nil {
 		fmt.Printf("Error en SELECT: %v\n", err)
 		return
